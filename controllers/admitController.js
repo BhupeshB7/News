@@ -1,4 +1,7 @@
 const Admit = require('../models/Admit');
+const NodeCache = require('node-cache');
+const cache = new NodeCache();
+
 // API endpoint for creating admits
 // exports.createAdmit =  async (req, res) => {
 //   try {
@@ -153,9 +156,28 @@ exports.updateAdmit = async (req, res) => {
   }
 };
 
- exports.getAdmit = async (req, res) => {
+//  exports.getAdmit = async (req, res) => {
+//   try {
+//     const admits = await Admit.find();
+//     res.json(admits);
+//   } catch (error) {
+//     res.status(500).json({ error: "Server error" });
+//   }
+// };
+exports.getAdmit = async (req, res) => {
   try {
+    // Check if data is already in cache
+    const cachedData = cache.get('admitData');
+    
+    if (cachedData) {
+      // console.log('Using cached data');
+      return res.json(cachedData);
+    }
+
+    // Fetch data from the database if not in cache
     const admits = await Admit.find();
+    cache.set('admitData', admits);
+
     res.json(admits);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
@@ -164,7 +186,12 @@ exports.updateAdmit = async (req, res) => {
 
 exports.getSpecificAdmitCard = async (req, res) => {
   try {
+    const cachedData = cache.get(admitSpecificData);
+    if(cachedData){
+      return res.json(cachedData);
+    }
     const admit = await Admit.findById(req.params.id);
+    cache.set('admitSpecificData', admit);
     res.json(admit);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
