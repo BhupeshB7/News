@@ -186,12 +186,8 @@ exports.getAdmit = async (req, res) => {
 
 exports.getSpecificAdmitCard = async (req, res) => {
   try {
-    const cachedData = cache.get(admitSpecificData);
-    if(cachedData){
-      return res.json(cachedData);
-    }
+    
     const admit = await Admit.findById(req.params.id);
-    cache.set('admitSpecificData', admit);
     res.json(admit);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
